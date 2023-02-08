@@ -5,7 +5,6 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { decryptLink, isTokenValid } from "../redux/crypto/apiCalls";
 import { useDispatch, useSelector } from "react-redux";
-import { Axios } from 'axios';
 
 const Receive = () => {
     const dispatch = useDispatch();
