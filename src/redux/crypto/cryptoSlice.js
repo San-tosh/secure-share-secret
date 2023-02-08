@@ -11,7 +11,7 @@ export const cryptoSlice = createSlice({
     initialState,
     reducers: {
       generateLinkStart: (state) => {
-        state.isFetching = false;
+        state.isFetching = true;
         state.error = false;
       },
       generateLinkSuccess: (state,action) => {
@@ -19,7 +19,7 @@ export const cryptoSlice = createSlice({
         state.token = action.payload;
       },
       generateLinkFailure: (state) => {
-        state.isFetching = true;
+        state.isFetching = false;
         state.error = false;
       },
       tokenValidStart: (state) => {
@@ -31,7 +31,7 @@ export const cryptoSlice = createSlice({
         state.token = action.payload;
       },
       tokenValidFailure: (state) => {
-        state.isFetching = true;
+        state.isFetching = false;
         state.error = false;
       },
     },

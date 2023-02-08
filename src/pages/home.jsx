@@ -7,10 +7,12 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { generateLink } from "../redux/crypto/apiCalls";
 import { useDispatch, useSelector } from "react-redux";
+import {MutatingDots} from "react-loader-spinner";
 
 const Home = () => {
     const dispatch = useDispatch();
-    const { error } = useSelector((state) => state.crypto);
+    const { isFetching, error } = useSelector((state) => state.crypto);
+    console.log(isFetching);
     const [theme, setTheme] = useState('dark');
     const [link, setLink] = useState(undefined);
     const [copy, setCopy] = useState(false);
@@ -80,9 +82,14 @@ const Home = () => {
     onSubmit: (values) => {
         generateLink(dispatch,values).then(data=> {
             setCopy(false);
-            setLink(window.location.origin+'/receive?token='+data)}).catch((e)=>{
+            formik.resetForm();
+            setLink(window.location.origin+'/receive?token='+data);
+
+        }
+        ).catch((e)=>{
                     setErrors('Something went wrong');
             });
+        console.log(isFetching);
     }
 });
   
@@ -107,77 +114,93 @@ const Home = () => {
             <BrightnessHighFill class="text-white text-2xl"/>
         }
         </div>
-        <div class="flex h-screen justify-center items-center">
-            <div class="w-full md:w-7/12 lg:w-5/12 xl:w-4/12">
-                <div class="form-card">
-                    <form onSubmit={formik.handleSubmit}>
-                        <h1 class="form-heading text-center">Secure Sharing Secret</h1>
-                        <div class="mb-4">
-                            <label for="secret" class="label">Enter Your Secret</label>
-                            <textarea id="secret" name="content" rows='4' class="form-control"
-                            onBlur={formik.handleBlur}
-                            onChange={formik.handleChange}
-                            value={formik.values.loginId}
-                            ></textarea>
-                            <span class='text-sm text-red-500 dark:text-red-200'>
+        {isFetching ?
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <MutatingDots
+                    height="100"
+                    width="100"
+                    color="#16a34a99"
+                    secondaryColor='#17472999'
+                    radius='14.5'
+                    ariaLabel="mutating-dots-loading"
+                    wrapperStyle={{}}
+                    // visible={isFetching}
+                />
+            </div>
+            :
+            <div class="flex h-screen justify-center items-center">
+                <div class="w-full md:w-7/12 lg:w-5/12 xl:w-4/12">
+                    <div class="form-card">
+                        <form onSubmit={formik.handleSubmit}>
+                            <h1 class="form-heading text-center">Secure Sharing Secret</h1>
+                            <div class="mb-4">
+                                <label for="secret" class="label">Enter Your Secret</label>
+                                <textarea id="secret" name="content" rows='4' class="form-control"
+                                          onBlur={formik.handleBlur}
+                                          onChange={formik.handleChange}
+                                          value={formik.values.loginId}
+                                ></textarea>
+                                <span class='text-sm text-red-500 dark:text-red-200'>
                                 {formik.errors.content && formik.touched.content && formik.errors.content}
                             </span>
-                        </div>
-                        <div class="mb-4">
-                            <label for="passphrase" class="label">Passphrase</label>
-                            <input type="text" name="passphrase" id="passphrase" class="form-control"
-                            onBlur={formik.handleBlur}
-                            onChange={formik.handleChange}
-                            value={formik.values.passphrase}
-                            />
-                            <span class='text-sm text-red-500 dark:text-red-200'>
+                            </div>
+                            <div class="mb-4">
+                                <label for="passphrase" class="label">Passphrase</label>
+                                <input type="text" name="passphrase" id="passphrase" class="form-control"
+                                       onBlur={formik.handleBlur}
+                                       onChange={formik.handleChange}
+                                       value={formik.values.passphrase}
+                                />
+                                <span class='text-sm text-red-500 dark:text-red-200'>
                                 {formik.errors.passphrase && formik.touched.passphrase && formik.errors.passphrase}
                             </span>
-                        </div>
-                        <div class="mb-4">
-                            <label for="expirySeconds" class="label">Expired At (Seconds)</label>
-                            <input type="number" name="expiredAt" id="expirySeconds" class="form-control"
-                            onBlur={formik.handleBlur}
-                            onChange={formik.handleChange}
-                            value={formik.values.expiredAt}
-                            />
-                            <span class='text-sm text-red-500 dark:text-red-200'>
+                            </div>
+                            <div class="mb-4">
+                                <label for="expirySeconds" class="label">Expired At (Seconds)</label>
+                                <input type="number" name="expiredAt" id="expirySeconds" class="form-control"
+                                       onBlur={formik.handleBlur}
+                                       onChange={formik.handleChange}
+                                       value={formik.values.expiredAt}
+                                />
+                                <span class='text-sm text-red-500 dark:text-red-200'>
                                 {formik.errors.expiredAt && formik.touched.expiredAt && formik.errors.expiredAt}
                             </span>
-                        </div>
-                        <div class="mt-6 mb-[.5rem] flex justify-center">
-                            <input type="submit" value="Generate" class="btn bg-black px-6 py-3 dark:bg-rose-500 dark:text-white" />
-                        </div>
-                    </form>
+                            </div>
+                            <div class="mt-6 mb-[.5rem] flex justify-center">
+                                <input type="submit" value="Generate"
+                                       class="btn bg-black px-6 py-3 dark:bg-rose-500 dark:text-white"/>
+                            </div>
+                        </form>
 
-                    {!error && link? (
-                    <div class="mt-6 alert alert-success rounded pr-[15px] pt-[1px]">
-                        <div class="flex flex-col justify-center items-center">
-                        <div class="absolute top-2 right-2 cursor-pointer"
-                                onClick={copyToClipBoard}>
-                                    {!copy? 
-                                    <Clipboard2 class='text-green text-md'/>
-                                    : <Clipboard2Check class='text-green text-md '/> 
-                                    }
-                                </div>
-                            <p class="py-2"><i>Generated Link:</i></p>
-                            <p class=" bg-white dark:bg-gray-800 dark:text-white py-2 sm:px-3 px-2 border-dashed border-2 break-all">
-                                {link}
-                            </p>
-                        </div>
-                    </div>)
-                : (errors && !link ? 
-                    <div class="mt-6 alert alert-danger rounded">
-                        <div class="flex flex-col justify-center items-center">
-                            <p class="bg-white dark:bg-gray-800 dark:text-white py-2 px-3">
-                                {errors}
-                            </p>
-                        </div>
-                    </div> : ''
-                    )}
+                        {!error && link ? (
+                                <div class="mt-6 alert alert-success rounded pr-[15px] pt-[1px]">
+                                    <div class="flex flex-col justify-center items-center">
+                                        <div class="absolute top-2 right-2 cursor-pointer"
+                                             onClick={copyToClipBoard}>
+                                            {!copy ?
+                                                <Clipboard2 class='text-green text-md'/>
+                                                : <Clipboard2Check class='text-green text-md '/>
+                                            }
+                                        </div>
+                                        <p class="py-2"><i>Generated Link:</i></p>
+                                        <p class=" bg-white dark:bg-gray-800 dark:text-white py-2 sm:px-3 px-2 border-dashed border-2 break-all">
+                                            {link}
+                                        </p>
+                                    </div>
+                                </div>)
+                            : (errors && !link ?
+                                    <div class="mt-6 alert alert-danger rounded">
+                                        <div class="flex flex-col justify-center items-center">
+                                            <p class="bg-white dark:bg-gray-800 dark:text-white py-2 px-3">
+                                                {errors}
+                                            </p>
+                                        </div>
+                                    </div> : ''
+                            )}
+                    </div>
                 </div>
-           </div>
-        </div>
+            </div>
+        }
     </div>
   )
 }

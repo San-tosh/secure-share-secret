@@ -5,10 +5,11 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { decryptLink, isTokenValid } from "../redux/crypto/apiCalls";
 import { useDispatch, useSelector } from "react-redux";
+import {MutatingDots} from "react-loader-spinner";
 
 const Receive = () => {
     const dispatch = useDispatch();
-    const { error } = useSelector((state) => state.crypto);
+    const { error,isFetching } = useSelector((state) => state.crypto);
     const [theme, setTheme] = useState('dark');
     const [errorMessage, setErrorMessage] = useState('');
     const [content, setContent] = useState(undefined);
@@ -74,8 +75,9 @@ const Receive = () => {
                 'Passphrase is required'),
     }),
     onSubmit: (values) => {
-        decryptLink(dispatch,{...values,token: token}).then(data=> 
-            setContent(data)).catch((e)=>{
+        decryptLink(dispatch,{...values,token: token}).then(data=> {
+            formik.resetForm();
+            setContent(data)}).catch((e)=>{
                     setContent(undefined);
                     setErrorMessage(e.message || 'Something went wrong');
             });
@@ -90,56 +92,72 @@ const Receive = () => {
             <BrightnessHighFill class="text-white text-2xl"/>
         }
         </div>
-        <div class="flex h-screen justify-center items-center">
-            <div class="w-full md:w-7/12 lg:w-5/12 xl:w-4/12">
-                <div class="form-card">
-                    <form onSubmit={formik.handleSubmit}>
-                        <h1 class="form-heading text-center">Secure Sharing Secret</h1>
-                        <div class="mb-4">
-                            <label for="passphrase" class="label">Passphrase</label>
-                            <input type="text" name="passphrase" id="passphrase" class="form-control"
-                            placeholder="Enter your passphrase"
-                            onBlur={formik.handleBlur}
-                            onChange={formik.handleChange}
-                            value={formik.values.passphrase}
-                            />
-                            <span class='text-sm text-red-500 dark:text-red-200'>
+        {isFetching ?
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <MutatingDots
+                    height="100"
+                    width="100"
+                    color="#16a34a99"
+                    secondaryColor='#17472999'
+                    radius='14.5'
+                    ariaLabel="mutating-dots-loading"
+                    wrapperStyle={{}}
+                    // visible={isFetching}
+                />
+            </div>
+            :
+            <div class="flex h-screen justify-center items-center">
+                <div class="w-full md:w-7/12 lg:w-5/12 xl:w-4/12">
+                    <div class="form-card">
+                        <form onSubmit={formik.handleSubmit}>
+                            <h1 class="form-heading text-center">Secure Sharing Secret</h1>
+                            <div class="mb-4">
+                                <label for="passphrase" class="label">Passphrase</label>
+                                <input type="text" name="passphrase" id="passphrase" class="form-control"
+                                       placeholder="Enter your passphrase"
+                                       onBlur={formik.handleBlur}
+                                       onChange={formik.handleChange}
+                                       value={formik.values.passphrase}
+                                />
+                                <span class='text-sm text-red-500 dark:text-red-200'>
                                 {formik.errors.passphrase && formik.touched.passphrase && formik.errors.passphrase}
                             </span>
-                        </div>
-                        {content ?
-                        <div class="mb-4">
-                            <label for="secret" class="label">Decrypted Content</label>
-                            <textarea id="secret" name="content" rows='4' class="form-control"
-                            value={content}
-                            readOnly
-                            ></textarea>
-                            
-                        </div>
-                        : ''}
-                       
-                        <div class="mt-6 mb-[.5rem] flex justify-center">
-                            <input type="submit" value="Decrypt" class="btn bg-black px-6 py-3 dark:bg-rose-500 dark:text-white" />
-                        </div>
-                    </form>
-                    {!error && content? (
-                    <div class="mt-6 alert alert-success rounded">
-                        <div class="flex flex-col justify-center items-center">
-                            <p class="py-3"><i>Decryption Successfull.</i></p>
-                        </div>
-                    </div>)
-                : (errorMessage && !content ? 
-                    <div class="mt-6 alert alert-danger rounded">
-                        <div class="flex flex-col justify-center items-center">
-                            <p class="bg-white dark:bg-gray-800 dark:text-white py-2 px-3">
-                                {errorMessage}
-                            </p>
-                        </div>
-                    </div> : ''
-                    )}
+                            </div>
+                            {content ?
+                                <div class="mb-4">
+                                    <label for="secret" class="label">Decrypted Content</label>
+                                    <textarea id="secret" name="content" rows='4' class="form-control"
+                                              value={content}
+                                              readOnly
+                                    ></textarea>
+
+                                </div>
+                                : ''}
+
+                            <div class="mt-6 mb-[.5rem] flex justify-center">
+                                <input type="submit" value="Decrypt"
+                                       class="btn bg-black px-6 py-3 dark:bg-rose-500 dark:text-white"/>
+                            </div>
+                        </form>
+                        {!error && content ? (
+                                <div class="mt-6 alert alert-success rounded">
+                                    <div class="flex flex-col justify-center items-center">
+                                        <p class="py-3"><i>Decryption Successfull.</i></p>
+                                    </div>
+                                </div>)
+                            : (errorMessage && !content ?
+                                    <div class="mt-6 alert alert-danger rounded">
+                                        <div class="flex flex-col justify-center items-center">
+                                            <p class="bg-white dark:bg-gray-800 dark:text-white py-2 px-3">
+                                                {errorMessage}
+                                            </p>
+                                        </div>
+                                    </div> : ''
+                            )}
+                    </div>
                 </div>
-           </div>
-        </div>
+            </div>
+        }
     </div>
   )
 }
