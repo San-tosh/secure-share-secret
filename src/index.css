@@ -2,6 +2,7 @@
 @tailwind components;
 @import "./tailwind-components/buttons.css";
 @import "./tailwind-components/form.css";
+@import "./tailwind-components/alerts.css";
 @tailwind utilities;
 
 
