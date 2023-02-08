@@ -59,7 +59,7 @@ const Receive = () => {
       return () => {
         isCancelled = true;
       }
-  },[]);
+  },[dispatch, token]);
 
   const formik = useFormik({
     initialValues: {
